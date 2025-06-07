@@ -12,34 +12,30 @@ BANK_APPS = {
 OUTPUT_DIR = "data/raw"
 os.makedirs(OUTPUT_DIR, exist_ok=True)  # Create directory if it doesn't exist
 
-def scrape_reviews(app_id, bank_name):
+def scrape_reviews(app_id, bank_name, reviews_limit=400):
     """
-    Scrapes all reviews for a given app from the Google Play Store.
+    Scrapes up to `reviews_limit` reviews for a given app from the Google Play Store.
 
     Parameters:
         app_id (str): The unique identifier for the bank's app in the Google Play Store.
         bank_name (str): The name of the bank for labeling purposes.
+        reviews_limit (int): Maximum number of reviews to scrape.
 
     Returns:
         pd.DataFrame: A DataFrame containing all reviews with relevant fields.
     """
     try:
-        # Fetch all reviews for the app
-        print(f"Scraping reviews for {bank_name}...")
+        print(f"Scraping up to {reviews_limit} reviews for {bank_name}...")
         reviews = reviews_all(
             app_id,
-            sleep_milliseconds=0,  # Avoid delays during scraping requests
-            lang='en',             # Scrape reviews in English
-            country='us'           # Focus on reviews from the US region
+            sleep_milliseconds=0,
+            lang='en',
+            country='us',
         )
-
-        # Print raw data for debugging
-        print(f"Raw data for {bank_name}:\n", reviews[:5])  # Print first 5 entries
-
-        # Convert reviews into a Pandas DataFrame
+        # Limit to the first `reviews_limit` reviews
+        reviews = reviews[:reviews_limit]
+        print(f"Raw data for {bank_name} (first 5):\n", reviews[:5])
         reviews_df = pd.DataFrame(reviews)
-
-        # Select and rename columns for consistency
         reviews_df = reviews_df[["content", "score", "at"]].rename(
             columns={
                 "content": "review",
@@ -47,15 +43,12 @@ def scrape_reviews(app_id, bank_name):
                 "at": "date"
             }
         )
-
-        # Add the bank name and source to the DataFrame
         reviews_df["bank"] = bank_name
         reviews_df["source"] = "Google Play Store"
-
         return reviews_df
     except Exception as e:
         print(f"Error while scraping reviews for {bank_name}: {e}")
-        return pd.DataFrame()  # Return an empty DataFrame if scraping fails
+        return pd.DataFrame()
 
 
 def save_reviews(df, bank_name):
@@ -84,7 +77,7 @@ def main():
 
     for bank_name, app_id in BANK_APPS.items():
         # Scrape reviews for the bank
-        bank_reviews = scrape_reviews(app_id, bank_name)
+        bank_reviews = scrape_reviews(app_id, bank_name, reviews_limit=400)
         
         if not bank_reviews.empty:
             # Save reviews to a CSV file

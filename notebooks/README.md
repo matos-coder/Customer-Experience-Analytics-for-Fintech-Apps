@@ -37,7 +37,7 @@ The workflow is implemented in [`notebooks/web_scraping.ipynb`](web_scraping.ipy
 ## Key Performance Indicators (KPIs)
 - **1,200+ reviews** collected with **less than 5% missing data**.
 - Clean, well-structured CSV dataset for analysis.
-- Organized Git repository with clear, frequent commits.
+- Organized Git repository with clear, frequent commits. 
 
 ## Minimum Essential Requirements
 - Scrape at least 400 reviews per bank (1,200 total).

@@ -78,7 +78,7 @@ def main():
     for bank_name, app_id in BANK_APPS.items():
         # Scrape reviews for the bank
         bank_reviews = scrape_reviews(app_id, bank_name, reviews_limit=400)
-        
+        print(f"{bank_name}: {len(bank_reviews)} reviews scraped.")  # Log the number of reviews
         if not bank_reviews.empty:
             # Save reviews to a CSV file
             save_reviews(bank_reviews, bank_name)

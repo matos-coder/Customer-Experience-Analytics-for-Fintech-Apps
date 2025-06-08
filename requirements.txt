@@ -9,3 +9,10 @@ tqdm
 
 # Optional (logging)
 loguru
+
+numpy
+transformers
+scikit-learn
+spacy
+torch
+hf_xet

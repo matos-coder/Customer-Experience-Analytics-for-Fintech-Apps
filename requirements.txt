@@ -1,0 +1,11 @@
+# Core dependencies
+google-play-scraper
+pandas
+python-dotenv
+
+# Utilities
+requests
+tqdm
+
+# Optional (logging)
+loguru

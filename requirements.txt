@@ -9,6 +9,7 @@ tqdm
 
 # Optional (logging)
 loguru
+logging
 
 numpy
 transformers
@@ -17,3 +18,7 @@ spacy
 torch
 hf_xet
 cx_Oracle
+
+matplotlib
+seaborn
+wordcloud

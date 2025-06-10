@@ -18,7 +18,7 @@ def load_data(path=None):
     return pd.read_csv(path)
 
 def get_sentiment_counts(df, by='bank'):
-    return df.groupby([by, 'sentiment_label']).size().unstack(fill_value=0)
+    return df.groupby([by, 'label']).size().unstack(fill_value=0)
 
 def plot_sentiment_bar(sentiment_counts, save_path=None):
     ax = sentiment_counts.plot(kind='bar', stacked=True, figsize=(10,6))

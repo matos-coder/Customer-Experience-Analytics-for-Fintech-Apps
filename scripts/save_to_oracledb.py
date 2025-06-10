@@ -3,16 +3,16 @@ import cx_Oracle
 import os
 
 # Load cleaned data
-DATA_PATH = os.path.join('data', 'all_banks_reviews_cleaned.csv')
+DATA_PATH = os.path.join('notebooks', 'data', 'processed', 'review_analysis.csv')
 df = pd.read_csv(DATA_PATH)
 
 # Oracle connection details
-ORACLE_USER = 'BANKREVIEWS'
+ORACLE_USER = 'SYS'
 ORACLE_PASSWORD = 'P@ssw0rd'
-ORACLE_DSN = cx_Oracle.makedsn('localhost', 1521, service_name='FREEPDB111')
+ORACLE_DSN = cx_Oracle.makedsn('localhost', 1521, service_name='XEPDB1')
 
 # Connect to Oracle
-conn = cx_Oracle.connect(user=ORACLE_USER, password=ORACLE_PASSWORD, dsn=ORACLE_DSN)
+conn = cx_Oracle.connect(user=ORACLE_USER, password=ORACLE_PASSWORD, dsn=ORACLE_DSN, mode=cx_Oracle.SYSDBA)
 cur = conn.cursor()
 
 # Create tables if not exist
@@ -42,32 +42,33 @@ def create_tables():
     conn.commit()
 
 # Insert banks and get their IDs
-def get_or_create_bank_id(bank_name):
-    cur.execute('SELECT bank_id FROM banks WHERE bank_name = :1', [bank_name])
+def get_or_create_bank_id(bank):
+    cur.execute('SELECT bank_id FROM banks WHERE bank_name = :1', [bank])
     row = cur.fetchone()
     if row:
         return row[0]
-    cur.execute('INSERT INTO banks (bank_name) VALUES (:1) RETURNING bank_id INTO :2', [bank_name, cur.var(cx_Oracle.NUMBER)])
-    bank_id = cur.getimplicitresults()[0][0]
+    bank_id_var = cur.var(cx_Oracle.NUMBER)
+    cur.execute('INSERT INTO banks (bank_name) VALUES (:1) RETURNING bank_id INTO :2', [bank, bank_id_var])
+    bank_id = bank_id_var.getvalue()
     conn.commit()
     return bank_id
 
 # Insert reviews
 def insert_reviews():
     for _, row in df.iterrows():
-        bank_id = get_or_create_bank_id(row['bank_name'])
+        bank_id = get_or_create_bank_id(str(row['bank']))
         cur.execute('''
             INSERT INTO reviews (bank_id, review_text, review_clean, sentiment_label, sentiment_score, themes, review_date)
             VALUES (:1, :2, :3, :4, :5, :6, :7)
-        ''', [
+        ''', (
             bank_id,
-            row.get('review', ''),
-            row.get('review_clean', ''),
-            row.get('sentiment_label', ''),
+            str(row.get('review', '')),
+            str(row.get('review_clean', '')),
+            str(row.get('sentiment_label', '')),
             float(row.get('sentiment_score', 0)),
-            row.get('themes', ''),
+            str(row.get('themes', '')),
             str(row.get('review_date', ''))
-        ])
+        ))
     conn.commit()
 
 if __name__ == '__main__':

@@ -16,3 +16,4 @@ scikit-learn
 spacy
 torch
 hf_xet
+cx_Oracle
